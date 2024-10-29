@@ -12,6 +12,8 @@
   "dependencies": {
     "@types/axios": "^0.14.4",
     "axios": "^1.7.7",
+    "cookie": "^1.0.1",
+    "js-cookie": "^3.0.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.27.0"
