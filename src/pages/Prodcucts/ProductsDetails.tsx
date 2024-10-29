@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchProductById, ProductDetail } from '../../api/Products';
+import { fetchProductById, ProductDetail } from '../../API/Products';
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

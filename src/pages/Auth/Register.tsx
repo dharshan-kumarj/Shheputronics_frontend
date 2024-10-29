@@ -1,6 +1,6 @@
 // src/pages/auth/Register.tsx
 import React, { useState } from 'react';
-import { handleUserRegistration } from '../../api/Auth';
+import { handleUserRegistration } from '../../API/Auth';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({

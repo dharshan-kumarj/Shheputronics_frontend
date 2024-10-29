@@ -1,7 +1,7 @@
 // src/pages/Profile/AddressList.tsx
 
 import React, { useState, useEffect } from 'react';
-import { fetchAllAddresses } from '../../api/Address/FetchAddress';
+import { fetchAllAddresses } from '../../API/Address/FetchAddress';
 
 interface Address {
   id: number;

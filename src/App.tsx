@@ -6,7 +6,8 @@ import ProductDetailPage from './pages/Prodcucts/ProductsDetails';
 import AddressList from './pages/Address/AddressList';
 import SingleAddress from './pages/Address/AddressbyId';
 import CreateAddress from './pages/Address/CreateAddress';
-import UpdateAddressForm from './pages/Address/UpdateAddress';
+import UpdateAddressForm from './pages/Address/CreateAddress';
+import PlaceOrderPage from './pages/Order/Order';
 
 function App() {
   return (
@@ -18,8 +19,9 @@ function App() {
         <Route path="/product/:id" element={<ProductDetailPage />} />
         <Route path="/address" element={<AddressList />} />
         <Route path="/address/:id" element={<SingleAddress />} />
-        <Route path="/address/new" element={<UpdateAddressForm />} />
+        <Route path="/address/new" element={<CreateAddress />} />
         <Route path="/address/update" element={<UpdateAddressForm />} />
+        <Route path="/place-order" element={<PlaceOrderPage />} />
       </Routes>
     </Router>
   );

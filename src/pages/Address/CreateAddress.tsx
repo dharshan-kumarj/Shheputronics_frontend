@@ -1,7 +1,7 @@
 // src/pages/CreateAddress.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createAddress, CreateAddressData } from '../../api/Address/EditAddress';
+import { createAddress, CreateAddressData } from '../../API/Address/EditAddress';
 const CreateAddress: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);

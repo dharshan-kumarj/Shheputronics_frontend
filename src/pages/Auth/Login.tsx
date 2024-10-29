@@ -1,6 +1,6 @@
 // src/pages/auth/Login.tsx
 import React, { useState } from 'react';
-import { handleUserLogin } from '../../api/Auth';
+import { handleUserLogin } from '../../API/Auth';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 

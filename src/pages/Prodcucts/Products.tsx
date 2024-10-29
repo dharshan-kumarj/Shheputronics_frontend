@@ -1,7 +1,7 @@
 // src/pages/Products.tsx
 
 import React, { useState } from 'react';
-import { fetchAllProducts } from '../../api/Products';
+import { fetchAllProducts } from '../../API/Products';
 
 const Products: React.FC = () => {
   const [formData, setFormData] = useState({

@@ -1,7 +1,7 @@
 // src/pages/UpdateAddress.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { updateAddress, UpdateAddressData } from '../../api/Address/EditAddress';
+import { updateAddress, UpdateAddressData } from '../../API/Address/EditAddress';
 import jwt_decode from 'jwt-decode';
 import Cookies from 'js-cookie';
 
