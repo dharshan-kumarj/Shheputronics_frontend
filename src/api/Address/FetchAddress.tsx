@@ -1,3 +1,4 @@
+// src/api/addressFetch.ts
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
@@ -66,7 +67,6 @@ apiClient.interceptors.request.use((config) => {
 const fetchAllAddresses = async (): Promise<AddressListResponse> => {
   try {
     console.log("Making request to:", ENDPOINTS.addresses);
-
     const response = await apiClient.get(ENDPOINTS.addresses);
     console.log("Response received:", response.data);
 
@@ -75,7 +75,6 @@ const fetchAllAddresses = async (): Promise<AddressListResponse> => {
       data: response.data,
       statusCode: response.status
     };
-
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.log("Error response:", error.response);
@@ -106,7 +105,6 @@ const fetchAllAddresses = async (): Promise<AddressListResponse> => {
 const fetchAddressById = async (addressId: number): Promise<AddressSingleResponse> => {
   try {
     console.log("Making request to:", ENDPOINTS.addressById(addressId));
-
     const response = await apiClient.get(ENDPOINTS.addressById(addressId));
     console.log("Response received:", response.data);
 
@@ -115,7 +113,6 @@ const fetchAddressById = async (addressId: number): Promise<AddressSingleRespons
       data: response.data,
       statusCode: response.status
     };
-
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.log("Error response:", error.response);

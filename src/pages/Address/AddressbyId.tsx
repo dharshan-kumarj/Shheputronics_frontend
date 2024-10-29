@@ -1,7 +1,7 @@
 // src/pages/SingleAddress.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchAddressById, Address } from '../../api/Address';
+import { fetchAddressById, Address } from '../../api/Address/FetchAddress';
 
 const SingleAddress: React.FC = () => {
   const { id } = useParams<{ id: string }>();
