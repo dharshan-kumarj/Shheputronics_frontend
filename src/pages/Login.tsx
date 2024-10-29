@@ -1,7 +1,7 @@
 // src/pages/Register.tsx
 
 import React, { useState } from 'react';
-import { handleUserRegistration, handleUserLogin } from '../api/auth';
+import { handleUserRegistration, handleUserLogin } from '../api/Auth';
 
 const Register: React.FC = () => {
   // Register form state
