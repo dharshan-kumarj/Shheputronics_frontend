@@ -1,5 +1,3 @@
-// src/api/cart.ts
-
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
@@ -29,7 +27,7 @@ interface CartResponse {
 // API config
 const API_BASE_URL = 'https://ecommerce.portos.site';
 const ENDPOINTS = {
-  cart: `${API_BASE_URL}/protected/cart/add`
+  cart: `${API_BASE_URL}/protected/cart`
 };
 
 // Axios instance
@@ -57,23 +55,71 @@ apiClient.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
+// Helper function to validate cart item structure
+const validateCartItem = (item: any): item is CartItem => {
+  return (
+    item &&
+    typeof item.id === 'number' &&
+    typeof item.product_id === 'number' &&
+    typeof item.quantity === 'number' &&
+    item.product &&
+    typeof item.product.name === 'string' &&
+    typeof item.product.price === 'number' &&
+    typeof item.product.thumbnail_url === 'string'
+  );
+};
+
 // Fetch cart items
 const getCart = async (): Promise<CartResponse> => {
   try {
     console.log("Making request to:", ENDPOINTS.cart);
+    
 
     const response = await apiClient.get(ENDPOINTS.cart);
-    console.log("Response received:", response.data);
+    console.log("Raw API response:", response.data);
+
+    // Validate response structure
+    if (!response.data || !Array.isArray(response.data.items)) {
+      console.error("Invalid response structure:", response.data);
+      throw new Error('Invalid response structure');
+    }
+
+    // Validate each cart item
+    const validItems = response.data.items.map((item: any) => {
+      if (!validateCartItem(item)) {
+        console.error("Invalid cart item structure:", item);
+        // Provide default values or throw error based on your requirements
+        return {
+          id: item.id || 0,
+          product_id: item.product_id || 0,
+          quantity: item.quantity || 0,
+          product: {
+            name: item.product?.name || 'Product Not Found',
+            price: item.product?.price || 0,
+            thumbnail_url: item.product?.thumbnail_url || '/placeholder.jpg'
+          }
+        };
+      }
+      return item;
+    });
 
     return {
       success: true,
-      data: response.data,
+      data: {
+        items: validItems,
+        total_items: response.data.total_items || validItems.length,
+        total_amount: response.data.total_amount || 0
+      },
       statusCode: response.status
     };
 
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      console.log("Error response:", error.response);
+      console.error("Axios error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
 
       if (error.response?.status === 401) {
         console.log("Unauthorized access, clearing token");
@@ -88,6 +134,7 @@ const getCart = async (): Promise<CartResponse> => {
       };
     }
 
+    console.error("Unexpected error:", error);
     return {
       success: false,
       error: 'An unexpected error occurred',

@@ -10,6 +10,9 @@ import UpdateAddressForm from './pages/Address/CreateAddress';
 import PlaceOrderPage from './pages/Order/Order';
 import ProductReviewPage from './pages/Prodcucts/ProductReview';
 import CartPage from './pages/Cart/FetchCart';
+import AddToCartPage from './pages/Cart/AddtoCart';
+import UpdateCartPage from './pages/Cart/UpdateCart';
+import DeleteCartItem from './pages/Cart/DeleteCart';
 
 function App() {
   return (
@@ -26,6 +29,9 @@ function App() {
         <Route path="/place-order" element={<PlaceOrderPage />} />
         <Route path="/product/review" element={<ProductReviewPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/cart/add" element={<AddToCartPage />} />
+        <Route path="/cart/update/:id" element={<UpdateCartPage />} />
+        <Route path="/cart/delete/:id" element={<DeleteCartItem />} />
       </Routes>
     </Router>
   );

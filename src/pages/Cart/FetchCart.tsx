@@ -1,16 +1,10 @@
-// src/pages/Cart.tsx
-
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getCart, CartItem } from '../../API/Cart/FetchCart';
+import { getCart } from '../../API/Cart/FetchCart';
 
 const CartPage: React.FC = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [responseData, setResponseData] = useState<any>(null);
   const [error, setError] = useState<string>('');
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [totalAmount, setTotalAmount] = useState<number>(0);
-  const [totalItems, setTotalItems] = useState<number>(0);
 
   useEffect(() => {
     loadCart();
@@ -18,17 +12,11 @@ const CartPage: React.FC = () => {
 
   const loadCart = async () => {
     try {
+      setLoading(true);
       const result = await getCart();
-      
-      if (result.success && result.data) {
-        setCartItems(result.data.items);
-        setTotalAmount(result.data.total_amount);
-        setTotalItems(result.data.total_items);
-      } else {
-        setError(result.error || 'Failed to load cart');
-      }
+      setResponseData(result);
     } catch (err) {
-      setError('Something went wrong!');
+      setError('Request failed');
     } finally {
       setLoading(false);
     }
@@ -42,84 +30,60 @@ const CartPage: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="p-4 bg-red-100 text-red-700 rounded shadow-lg">
-          {error}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">API Response Debug View</h1>
+          <button 
+            onClick={loadCart}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Refresh Data
+          </button>
+        </div>
 
-        {cartItems.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-600 mb-4">Your cart is empty</p>
-            <button
-              onClick={() => navigate('/products')}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Continue Shopping
-            </button>
+        {error ? (
+          <div className="p-4 bg-red-100 text-red-700 rounded">
+            {error}
           </div>
         ) : (
-          <>
-            <div className="space-y-4">
-              {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center border-b pb-4 last:border-b-0"
-                >
-                  <img
-                    src={item.product.thumbnail_url}
-                    alt={item.product.name}
-                    className="w-24 h-24 object-cover rounded"
-                  />
-                  <div className="ml-4 flex-grow">
-                    <h3 className="font-semibold">{item.product.name}</h3>
-                    <p className="text-gray-600">
-                      Quantity: {item.quantity}
-                    </p>
-                    <p className="text-blue-600 font-medium">
-                      ${item.product.price.toFixed(2)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold">
-                      ${(item.product.price * item.quantity).toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              ))}
+          <div className="space-y-4">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h2 className="text-lg font-semibold mb-2">Request Status</h2>
+              <div className="flex items-center space-x-2">
+                <div className={`w-3 h-3 rounded-full ${responseData?.success ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span>{responseData?.success ? 'Success' : 'Failed'}</span>
+              </div>
+              {responseData?.statusCode && (
+                <p className="text-gray-600 mt-1">Status Code: {responseData.statusCode}</p>
+              )}
             </div>
 
-            <div className="mt-6 border-t pt-4">
-              <div className="flex justify-between text-lg font-bold">
-                <span>Total ({totalItems} items):</span>
-                <span>${totalAmount.toFixed(2)}</span>
+            {responseData?.error && (
+              <div className="bg-red-50 rounded-lg p-4">
+                <h2 className="text-lg font-semibold mb-2 text-red-700">Error</h2>
+                <p className="text-red-600">{responseData.error}</p>
               </div>
-              
-              <div className="mt-6 flex justify-end space-x-4">
-                <button
-                  onClick={() => navigate('/products')}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 rounded border border-gray-300"
-                >
-                  Continue Shopping
-                </button>
-                <button
-                  onClick={() => navigate('/checkout')}
-                  className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                >
-                  Checkout
-                </button>
-              </div>
+            )}
+
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h2 className="text-lg font-semibold mb-2">Raw Response Data</h2>
+              <pre className="bg-gray-100 p-4 rounded overflow-x-auto text-sm">
+                {JSON.stringify(responseData, null, 2)}
+              </pre>
             </div>
-          </>
+
+            {responseData?.data?.items && (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h2 className="text-lg font-semibold mb-2">Items Count</h2>
+                <p>{responseData.data.items.length} items in cart</p>
+                <p className="text-gray-600 mt-1">
+                  Total Amount: ${responseData.data.total_amount?.toFixed(2) || '0.00'}
+                </p>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>
