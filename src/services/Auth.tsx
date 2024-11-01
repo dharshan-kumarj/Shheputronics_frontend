@@ -1,96 +1,133 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
-// Interfaces for API requests
-interface RegisterUserData {
- username: string;
- email: string;
- password: string;
+// Interfaces
+export interface RegisterUserData {
+  username: string;
+  email: string;
+  password: string;
 }
 
-interface LoginUserData {
- username: string;
- password: string;
+export interface LoginUserData {
+  username: string;
+  password: string;
 }
 
-// Base API URL 
+export interface AuthResponse {
+  success: boolean;
+  data?: {
+    token?: string;
+    user?: {
+      id: string;
+      username: string;
+      email: string;
+    };
+  };
+  message?: string;
+  error?: string;
+  statusCode?: number;
+}
+
+// Constants
 const API_BASE_URL = 'https://ecommerce.portos.site';
-
-// API endpoints
 const ENDPOINTS = {
- register: `${API_BASE_URL}/register`,
- login: `${API_BASE_URL}/login`
+  register: `${API_BASE_URL}/register`,
+  login: `${API_BASE_URL}/login`
 };
 
-// Axios instance with default config
+// Axios instance configuration
 const apiClient = axios.create({
- baseURL: API_BASE_URL,
- headers: {
-   'Content-Type': 'application/json'
- }
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
+// Token management
+export const setAuthToken = (token: string) => {
+  Cookies.set('auth_token', `Bearer ${token}`, {
+    expires: 7,
+    secure: true,
+    sameSite: 'strict'
+  });
+  // Set token for future axios requests
+  apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+};
+
+export const getAuthToken = (): string | null => {
+  return Cookies.get('auth_token') || null;
+};
+
+export const removeAuthToken = () => {
+  Cookies.remove('auth_token');
+  delete apiClient.defaults.headers.common['Authorization'];
+};
+
 // Register user function
-const handleUserRegistration = async (userData: RegisterUserData) => {
- try {
-   const response = await apiClient.post(ENDPOINTS.register, {
-     username: userData.username,
-     email: userData.email,
-     password: userData.password
-   });
+export const handleUserRegistration = async (userData: RegisterUserData): Promise<AuthResponse> => {
+  try {
+    const response = await apiClient.post(ENDPOINTS.register, {
+      username: userData.username,
+      email: userData.email,
+      password: userData.password
+    });
 
-   return {
-     success: true,
-     data: response.data,
-     message: 'Registration successful'
-   };
-
- } catch (error) {
-   if (axios.isAxiosError(error)) {
-     return {
-       success: false,
-       error: error.response?.data?.message || 'Registration failed',
-       statusCode: error.response?.status
-     };
-   }
-   return {
-     success: false, 
-     error: 'An unexpected error occurred',
-     statusCode: 500
-   };
- }
+    return {
+      success: true,
+      data: response.data,
+      message: 'Registration successful'
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Registration failed',
+        statusCode: error.response?.status
+      };
+    }
+    return {
+      success: false,
+      error: 'An unexpected error occurred',
+      statusCode: 500
+    };
+  }
 };
 
 // Login user function
-const handleUserLogin = async (userData: LoginUserData) => {
- try {
-   const response = await apiClient.post(ENDPOINTS.login, {
-     username: userData.username,
-     password: userData.password
-   });
+export const handleUserLogin = async (userData: LoginUserData): Promise<AuthResponse> => {
+  try {
+    const response = await apiClient.post(ENDPOINTS.login, {
+      username: userData.username,
+      password: userData.password
+    });
 
-   return {
-     success: true,
-     data: response.data,
-     message: 'Login successful'
-   };
+    if (response.data?.token) {
+      setAuthToken(response.data.token);
+    }
 
- } catch (error) {
-   if (axios.isAxiosError(error)) {
-     return {
-       success: false,
-       error: error.response?.data?.message || 'Login failed',
-       statusCode: error.response?.status
-     };
-   }
-   return {
-     success: false,
-     error: 'An unexpected error occurred',
-     statusCode: 500
-   };
- }
+    return {
+      success: true,
+      data: response.data,
+      message: 'Login successful'
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Login failed',
+        statusCode: error.response?.status
+      };
+    }
+    return {
+      success: false,
+      error: 'An unexpected error occurred',
+      statusCode: 500
+    };
+  }
 };
 
-export { 
- handleUserRegistration, 
- handleUserLogin 
+// Check if user is authenticated
+export const isAuthenticated = (): boolean => {
+  const token = getAuthToken();
+  return !!token;
 };
