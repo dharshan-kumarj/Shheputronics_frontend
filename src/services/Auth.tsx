@@ -45,7 +45,7 @@ const apiClient = axios.create({
 
 // Token management
 export const setAuthToken = (token: string) => {
-  Cookies.set('auth_token', `Bearer ${token}`, {
+  Cookies.set('auth_token', `${token}`, {
     expires: 7,
     secure: true,
     sameSite: 'strict'

@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 import { useNavigate } from "react-router-dom";
 import { Loader } from 'lucide-react';
 
-// SVG Icons
+// SVG Icons remain unchanged
 const PlusIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -27,6 +27,7 @@ const TrashIcon = () => (
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pendingRequests, setPendingRequests] = useState(new Set());
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,7 +43,8 @@ const CartPage = () => {
       if (response.ok) {
         const data = await response.json();
         const formattedItems = data.items.map(item => ({
-          product_id: item.product_id, // Changed: using product_id directly from API response
+          id: item.id,
+          product_id: item.product_id,
           name: item.name,
           image: item.thumbnail_url || '/api/placeholder/100/100',
           price: item.price,
@@ -59,12 +61,26 @@ const CartPage = () => {
     fetchCartItems();
   }, []);
 
-// Update API endpoint calls to use item.product_id
-const updateQuantity = async (itemId, newQuantity) => {
-    const token = Cookies.get('auth_token');
-    const itemToUpdate = cartItems.find(item => item.product_id === itemId);
+  const updateQuantity = async (itemId, newQuantity) => {
+    const itemToUpdate = cartItems.find(item => item.id === itemId);
+    if (!itemToUpdate || pendingRequests.has(itemId)) return;
 
-    if (itemToUpdate) {
+    // Store original state for rollback
+    const originalItems = [...cartItems];
+
+    // Optimistically update UI
+    setCartItems(cartItems.map(item => {
+      if (item.id === itemId) {
+        return { ...item, quantity: Math.min(Math.max(1, newQuantity), item.maxQuantity) };
+      }
+      return item;
+    }));
+
+    // Add to pending requests
+    setPendingRequests(prev => new Set(prev).add(itemId));
+
+    const token = Cookies.get('auth_token');
+    try {
       const response = await fetch(`https://ecommerce.portos.site/protected/cart/item/${itemId}`, {
         method: 'PUT',
         headers: {
@@ -74,42 +90,69 @@ const updateQuantity = async (itemId, newQuantity) => {
         body: JSON.stringify({ quantity: newQuantity }),
       });
 
-      if (response.ok) {
-        setCartItems(cartItems.map(item => {
-          if (item.product_id === itemId) {
-            return { ...item, quantity: Math.min(Math.max(1, newQuantity), item.maxQuantity) };
-          }
-          return item;
-        }));
-      } else {
-        console.error('Failed to update item quantity');
+      if (!response.ok) {
+        throw new Error('Failed to update item quantity');
       }
+    } catch (error) {
+      console.error('Failed to update item quantity:', error);
+      // Rollback on error
+      setCartItems(originalItems);
+    } finally {
+      // Remove from pending requests
+      setPendingRequests(prev => {
+        const next = new Set(prev);
+        next.delete(itemId);
+        return next;
+      });
     }
-};
+  };
 
-const removeItem = async (itemId) => {
+  const removeItem = async (itemId) => {
+    if (pendingRequests.has(itemId)) return;
+
+    // Store original state for rollback
+    const originalItems = [...cartItems];
+
+    // Optimistically update UI
+    setCartItems(cartItems.filter(item => item.id !== itemId));
+
+    // Add to pending requests
+    setPendingRequests(prev => new Set(prev).add(itemId));
+
     const token = Cookies.get('auth_token');
+    try {
+      const response = await fetch(`https://ecommerce.portos.site/protected/cart/item/${itemId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-    const response = await fetch(`https://ecommerce.portos.site/protected/cart/item/${itemId}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (response.ok) {
-      setCartItems(cartItems.filter(item => item.product_id !== itemId));
-    } else {
-      console.error('Failed to remove item');
+      if (!response.ok) {
+        throw new Error('Failed to remove item');
+      }
+    } catch (error) {
+      console.error('Failed to remove item:', error);
+      // Rollback on error
+      setCartItems(originalItems);
+    } finally {
+      // Remove from pending requests
+      setPendingRequests(prev => {
+        const next = new Set(prev);
+        next.delete(itemId);
+        return next;
+      });
     }
-};
+  };
+
+  // Rest of the component remains the same
   const calculateSubtotal = () => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
-  const shipping = 0; // Free shipping
-  const tax = calculateSubtotal() * 0.18; // 18% tax
+  const shipping = 0;
+  const tax = calculateSubtotal() * 0.18;
   const total = calculateSubtotal() + shipping + tax;
 
   const handleCheckout = () => {
@@ -131,11 +174,10 @@ const removeItem = async (itemId) => {
         <h1 className="text-2xl font-bold mb-8">Shopping Cart ({cartItems.length} items)</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             {cartItems.length > 0 ? (
               cartItems.map(item => (
-                <div key={item.product_id} className="bg-gray-800 rounded-lg p-4">
+                <div key={item.id} className="bg-gray-800 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <img
@@ -153,9 +195,9 @@ const removeItem = async (itemId) => {
                     <div className="flex flex-col items-end space-y-2">
                       <div className="flex items-center space-x-3">
                         <button
-                          onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
-                          className="p-1 rounded-lg hover:bg-gray-700"
-                          disabled={item.quantity <= 1}
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="p-1 rounded-lg hover:bg-gray-700 disabled:opacity-50"
+                          disabled={item.quantity <= 1 || pendingRequests.has(item.id)}
                         >
                           <div className="w-4 h-4">
                             <MinusIcon />
@@ -163,9 +205,9 @@ const removeItem = async (itemId) => {
                         </button>
                         <span className="w-8 text-center">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
-                          className="p-1 rounded-lg hover:bg-gray-700"
-                          disabled={item.quantity >= item.maxQuantity}
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="p-1 rounded-lg hover:bg-gray-700 disabled:opacity-50"
+                          disabled={item.quantity >= item.maxQuantity || pendingRequests.has(item.id)}
                         >
                           <div className="w-4 h-4">
                             <PlusIcon />
@@ -173,8 +215,9 @@ const removeItem = async (itemId) => {
                         </button>
                       </div>
                       <button
-                        onClick={() => removeItem(item.product_id)}
-                        className="text-red-400 hover:text-red-300 flex items-center text-sm"
+                        onClick={() => removeItem(item.id)}
+                        className="text-red-400 hover:text-red-300 flex items-center text-sm disabled:opacity-50"
+                        disabled={pendingRequests.has(item.id)}
                       >
                         <div className="w-4 h-4 mr-1">
                           <TrashIcon />
@@ -201,7 +244,6 @@ const removeItem = async (itemId) => {
             )}
           </div>
 
-          {/* Order Summary */}
           {cartItems.length > 0 && (
             <div className="lg:col-span-1">
               <div className="bg-gray-800 rounded-lg p-6 sticky top-4">
