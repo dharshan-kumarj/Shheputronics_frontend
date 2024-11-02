@@ -7,7 +7,10 @@ import OrderTrackingPage from './pages/OrderTrackingPage';
 import ProfilePage from './pages/ProfilePage';
 import CheckoutPage from './pages/CheckoutPage';
 import AuthPage from './pages/AuthPage';
+import ProductListingPage from './pages/ProductListingPage';
+import OrderSuccessPage from './pages/OrderSuccessPage'
 import './App.css'
+
 function App() {
   return (
     <Router>
@@ -16,6 +19,10 @@ function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/categories" element={<CategoriesPage />} />
       <Route path="/product/:id" element={<ProductDetailPage />} />
+
+      <Route path="/products" element={<ProductListingPage />} />
+      
+      <Route path="//order/success/:orderId" element={<OrderSuccessPage />} />
       <Route path="/cart" element={<CartPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/profile" element={<ProfilePage />} />

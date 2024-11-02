@@ -1,48 +1,40 @@
 import React, { useRef } from 'react';
 import { Search, Heart, ShoppingCart, ChevronRight, ChevronLeft } from 'lucide-react';
+import Navbar from '../components/Navbar';
 
+import { useNavigate } from 'react-router-dom';
 const categories = [
   {
     title: "Sensors & Transducers",
     image: "/api/placeholder/120/120",
-  },
-  {
-    title: "Resistors & Capacitors",
-    image: "/api/placeholder/120/120",
-  },
-  {
-    title: "Diodes & Rectifiers",
-    image: "/api/placeholder/120/120",
+    categoryPath: "/sensors" // matches the path in categoryMap from CategoriesPage
   },
   {
     title: "Transistors & FETs",
     image: "/api/placeholder/120/120",
-  },
-  {
-    title: "LEDs & Displays",
-    image: "/api/placeholder/120/120",
+    categoryPath: "/transistors"
   },
   {
     title: "Connectors & Cables",
     image: "/api/placeholder/120/120",
+    categoryPath: "/connectors"
   },
   {
-    title: "Microcontrollers",
+    title: "Diodes & Rectifiers",
     image: "/api/placeholder/120/120",
+    categoryPath: "/rectifiers"
   },
   {
-    title: "Development Boards",
+    title: "LEDs & Displays",
     image: "/api/placeholder/120/120",
+    categoryPath: "/displays"
   },
   {
-    title: "Power Supplies",
+    title: "Cables",
     image: "/api/placeholder/120/120",
-  },
-  {
-    title: "Test Equipment",
-    image: "/api/placeholder/120/120",
+    categoryPath: "/cables"
   }
-];
+]
 
 const ElectronicsDarkStore = () => {
   const scrollContainerRef = useRef(null);
@@ -54,28 +46,15 @@ const ElectronicsDarkStore = () => {
       container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
+  let navigate = useNavigate();
+  const handleCategoryClick = (categoryPath) => {
+    navigate(`/categories`, { state: { selectedCategory: categoryPath } });
+  };
 
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navigation */}
-      <nav className="flex items-center justify-between px-6 py-4">
-        <div className="flex items-center space-x-8">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-white rounded-full mr-2"></div>
-            <span className="text-sm font-medium">/ sheeputronics</span>
-          </div>
-          <div className="space-x-6 text-sm">
-            <button className="text-white">Explore</button>
-            <button className="text-gray-400">Categories</button>
-            <button className="text-gray-400">Support</button>
-          </div>
-        </div>
-        <div className="flex items-center space-x-6">
-          <Search className="w-5 h-5 text-gray-400" />
-          <Heart className="w-5 h-5 text-gray-400" />
-          <ShoppingCart className="w-5 h-5 text-gray-400" />
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero Section */}
       <div className="grid grid-cols-2 gap-8 px-12 py-16">
@@ -104,7 +83,7 @@ const ElectronicsDarkStore = () => {
         <div className="relative">
           <div className="absolute top-0 right-0 w-full h-full">
             <div className="relative w-full h-full">
-              <img 
+              <img
                 src="/api/placeholder/600/400"
                 alt="Circuit Board"
                 className="object-contain w-full h-full"
@@ -119,19 +98,20 @@ const ElectronicsDarkStore = () => {
       <div className="px-12 py-8 relative">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-xl font-medium">/categories</h2>
-          <button className="flex items-center text-sm text-gray-400 hover:text-gray-300 bg-gray-800/50 px-4 py-1 rounded-full">
+          <button className="flex items-center text-sm text-gray-400 hover:text-gray-300 bg-gray-800/50 px-4 py-1 rounded-full"  onClick={() => handleCategoryClick("")}
+          >
             See more <ChevronRight className="w-4 h-4 ml-1" />
           </button>
         </div>
-        
+
         {/* Scroll Buttons */}
-        <button 
+        <button
           onClick={() => scroll('left')}
           className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800/80 p-2 rounded-full hover:bg-gray-700 transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <button 
+        <button
           onClick={() => scroll('right')}
           className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800/80 p-2 rounded-full hover:bg-gray-700 transition-colors"
         >
@@ -139,7 +119,7 @@ const ElectronicsDarkStore = () => {
         </button>
 
         {/* Scrollable Container */}
-        <div 
+        <div
           ref={scrollContainerRef}
           className="overflow-x-auto scrollbar-hide relative"
           style={{
@@ -149,12 +129,14 @@ const ElectronicsDarkStore = () => {
         >
           <div className="flex space-x-4 min-w-min pb-4">
             {categories.map((category, index) => (
-              <div 
+              <div
                 key={index}
+                onClick={() => handleCategoryClick(category.categoryPath)}
+
                 className="flex-shrink-0 w-48 bg-gray-800/50 p-4 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors duration-200"
               >
                 <div className="aspect-square rounded-lg overflow-hidden mb-3">
-                  <img 
+                  <img
                     src={category.image}
                     alt={category.title}
                     className="w-full h-full object-cover"
