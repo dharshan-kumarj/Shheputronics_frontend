@@ -1,13 +1,13 @@
 import React, { useRef } from 'react';
 import { Search, Heart, ShoppingCart, ChevronRight, ChevronLeft } from 'lucide-react';
 import Navbar from '../components/Navbar';
-
 import { useNavigate } from 'react-router-dom';
+import hero_icon from '../assets/home/hero.svg'
 const categories = [
   {
     title: "Sensors & Transducers",
     image: "/api/placeholder/120/120",
-    categoryPath: "/sensors" // matches the path in categoryMap from CategoriesPage
+    categoryPath: "/sensors"
   },
   {
     title: "Transistors & FETs",
@@ -34,10 +34,11 @@ const categories = [
     image: "/api/placeholder/120/120",
     categoryPath: "/cables"
   }
-]
+];
 
 const ElectronicsDarkStore = () => {
   const scrollContainerRef = useRef(null);
+  const navigate = useNavigate();
 
   const scroll = (direction) => {
     const container = scrollContainerRef.current;
@@ -46,79 +47,87 @@ const ElectronicsDarkStore = () => {
       container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
-  let navigate = useNavigate();
+
   const handleCategoryClick = (categoryPath) => {
     navigate(`/categories`, { state: { selectedCategory: categoryPath } });
   };
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Navigation */}
       <Navbar />
 
-      {/* Hero Section */}
-      <div className="grid grid-cols-2 gap-8 px-12 py-16">
-        <div className="space-y-6">
-          <h1 className="text-6xl font-bold leading-tight">
-            Power Your Projects with{" "}
-            <span className="text-purple-500">
-              Precision and Value
-              <span className="tracking-wider">
-                {" ...."}
+      {/* Hero Section with Gradient Text */}
+      <div className="px-6 lg:px-12 py-8 lg:py-16">
+        <div className="grid lg:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
+              <span className="bg-gradient-to-r from-white via-white to-purple-500 inline-block text-transparent bg-clip-text">
+                Power Your Projects
               </span>
-            </span>
-          </h1>
-          <p className="text-gray-400 text-sm max-w-md">
-            We provide you with the best electronic components at reasonable prices. Whether you're a hobbyist, student, or professional, we have got you covered.
-          </p>
-          <div className="flex space-x-4 pt-4">
-            <button className="bg-gray-100 text-black px-6 py-2 rounded-full text-sm hover:bg-gray-200 transition-colors">
-              /buy in bulk
-            </button>
-            <button className="border border-gray-700 px-6 py-2 rounded-full text-sm hover:border-gray-600 transition-colors">
-              /we will do
-            </button>
+              <br />
+              <span className="bg-gradient-to-r from-white to-purple-800 inline-block text-transparent bg-clip-text">
+                with Precision and
+              </span>
+              <span className="tracking-wider text-purple-400">
+                Value  {" ...."}
+              </span>
+            </h1>
+            <p className="text-gray-400 text-sm max-w-md">
+              We provide you with the best electronic components at reasonable prices.
+              Whether you're a hobbyist, student, or professional, we have got you covered.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 sm:space-x-4 pt-4">
+              <button className="bg-gradient-to-r from-gray-100 to-gray-200 text-black px-6 py-2 rounded-full text-sm hover:opacity-90 transition-opacity">
+                /buy in bulk
+              </button>
+              <button className="border border-gray-700 px-6 py-2 rounded-full text-sm hover:border-gray-600 transition-colors">
+                /we will do
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="relative">
-          <div className="absolute top-0 right-0 w-full h-full">
-            <div className="relative w-full h-full">
-              <img
-                src="/api/placeholder/600/400"
-                alt="Circuit Board"
-                className="object-contain w-full h-full"
-              />
-              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-purple-500/20 to-transparent opacity-50" />
+
+          {/* Hero Image - Hidden on Mobile */}
+          <div className="hidden lg:block relative">
+            <div className="absolute top-0 right-0 w-full h-full">
+              <div className="relative w-full h-full flex items-center justify-center">
+                <img
+                  src={hero_icon}
+                  alt="Circuit Board"
+                  className="object-contain w-[800px] h-[600px]" // Increased fixed dimensions
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Categories Section */}
-      <div className="px-12 py-8 relative">
+      <div className="px-6 lg:px-12 py-8 relative">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-xl font-medium">/categories</h2>
-          <button className="flex items-center text-sm text-gray-400 hover:text-gray-300 bg-gray-800/50 px-4 py-1 rounded-full"  onClick={() => handleCategoryClick("")}
+          <button
+            className="flex items-center text-sm text-gray-400 hover:text-gray-300 bg-gray-800/50 px-4 py-1 rounded-full"
+            onClick={() => handleCategoryClick("")}
           >
             See more <ChevronRight className="w-4 h-4 ml-1" />
           </button>
         </div>
 
-        {/* Scroll Buttons */}
+        {/* Scroll Buttons - Hidden on Mobile */}
         <button
           onClick={() => scroll('left')}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800/80 p-2 rounded-full hover:bg-gray-700 transition-colors"
+          className="hidden lg:block absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800/80 p-2 rounded-full hover:bg-gray-700 transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button
           onClick={() => scroll('right')}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800/80 p-2 rounded-full hover:bg-gray-700 transition-colors"
+          className="hidden lg:block absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800/80 p-2 rounded-full hover:bg-gray-700 transition-colors"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
 
-        {/* Scrollable Container */}
+        {/* Scrollable Categories */}
         <div
           ref={scrollContainerRef}
           className="overflow-x-auto scrollbar-hide relative"
@@ -132,8 +141,7 @@ const ElectronicsDarkStore = () => {
               <div
                 key={index}
                 onClick={() => handleCategoryClick(category.categoryPath)}
-
-                className="flex-shrink-0 w-48 bg-gray-800/50 p-4 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors duration-200"
+                className="flex-shrink-0 w-36 lg:w-48 bg-gray-800/50 p-4 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors duration-200"
               >
                 <div className="aspect-square rounded-lg overflow-hidden mb-3">
                   <img
@@ -148,17 +156,15 @@ const ElectronicsDarkStore = () => {
           </div>
         </div>
 
-        {/* Custom Scrollbar */}
+        {/* Custom Scrollbar Styles */}
         <style jsx global>{`
-          /* Hide scrollbar for Chrome, Safari and Opera */
           .scrollbar-hide::-webkit-scrollbar {
             display: none;
           }
           
-          /* Hide scrollbar for IE, Edge and Firefox */
           .scrollbar-hide {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
           }
         `}</style>
       </div>

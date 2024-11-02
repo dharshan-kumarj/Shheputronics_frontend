@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from "react-router-dom";
 import { Loader } from 'lucide-react';
+import Navbar from '../components/Navbar';
 
 // SVG Icons remain unchanged
 const PlusIcon = () => (
@@ -169,7 +170,8 @@ const CartPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white py-8">
+    <div className="min-h-screen bg-black text-white py-8">
+      <Navbar/>
       <div className="max-w-6xl mx-auto px-4">
         <h1 className="text-2xl font-bold mb-8">Shopping Cart ({cartItems.length} items)</h1>
 

@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Star} from 'lucide-react';  // Add Star to imports
+import Navbar from '../components/Navbar';
+
+import { Loader } from 'lucide-react';
 
 // SVG Icons
 const PackageIcon = () => (
@@ -252,19 +255,20 @@ const OrderTrackingPage = () => {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-      Loading...
-    </div>
+    <div className="fixed inset-0 flex justify-center items-center bg-gray-900 z-50">
+        <Loader className="w-8 h-8 animate-spin text-purple-500" />
+      </div>
   );
 
   if (error) return (
-    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+    <div className="min-h-screen bg-black text-white flex items-center justify-center">
       Error: {error}
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white py-8">
+    <div className="min-h-screen bg-black text-white py-8">
+      <Navbar/>
       <div className="max-w-6xl mx-auto px-4">
         <h1 className="text-2xl font-bold mb-8">My Orders</h1>
 

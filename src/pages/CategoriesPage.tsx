@@ -69,7 +69,7 @@ const banners = [
 // Inside the CategoriesPage component
 const ProductCard = ({ product }: { product: Product }) => (
     <Link to={`/product/${product.id}`} className="hover:no-underline">
-        <div className="bg-gray-800 rounded-lg p-4 flex flex-col">
+        <div className="bg-black-800 bg-black border border-gray-800 rounded-lg p-4 flex flex-col">
             <div className="relative">
                 <img 
                     src={product.thumbnail_url || "/api/placeholder/200/200"}
@@ -269,13 +269,13 @@ const CategoriesPage = () => {
                                 ? 'bg-blue-600 text-white' 
                                 : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
                     >
-                        {category.replace('/', '')}
+                        {category}
                     </button>
                 ))}
             </div>
 
             {/* Filter Controls */}
-            <div className="px-6 py-4 flex flex-wrap gap-4">
+            {/* <div className="px-6 py-4 flex flex-wrap gap-4">
                 <select 
                     value={sortOrder}
                     onChange={(e) => handleSortChange(e.target.value)}
@@ -324,7 +324,7 @@ const CategoriesPage = () => {
                     />
                     In Stock Only
                 </label>
-            </div>
+            </div> */}
 
             {/* Products Grid */}
             <div className="px-6 py-4">
