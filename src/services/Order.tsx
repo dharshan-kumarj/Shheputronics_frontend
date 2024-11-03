@@ -2,101 +2,72 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-// Interfaces
-interface OrderItem {
-  product_id: number;
-  quantity: number;
-}
+export const orderService = {
+  async getOrders() {
+    const response = await fetch(`${BASE_URL}/protected/orders`, {
+      headers: this.getAuthHeaders(),
+    });
 
-interface PlaceOrderData {
-  address_id: number;
-  items: OrderItem[];
-}
-
-interface OrderResponse {
-  success: boolean;
-  data?: {
-    order_id?: number;
-    message?: string;
-  };
-  error?: string;
-  statusCode?: number;
-}
-
-// API config
-const API_BASE_URL = 'https://ecommerce.portos.site';
-const ENDPOINTS = {
-  placeOrder: `${API_BASE_URL}/protected/orders`
-};
-
-// Axios instance with auth interceptor
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
-
-// Add token to requests
-apiClient.interceptors.request.use((config) => {
-  const token = Cookies.get('token');
-  console.log("Current token:", token);
-
-  if (token && config.headers) {
-    config.headers.Authorization = token;
-    console.log("Authorization header:", config.headers.Authorization);
-  } else {
-    console.log("No token found or headers undefined");
-  }
-  return config;
-}, (error) => {
-  console.log("Interceptor error:", error);
-  return Promise.reject(error);
-});
-
-// Place order function
-const placeOrder = async (orderData: PlaceOrderData): Promise<OrderResponse> => {
-  try {
-    console.log("Making order request to:", ENDPOINTS.placeOrder);
-    console.log("Order data:", orderData);
-
-    const response = await apiClient.post(ENDPOINTS.placeOrder, orderData);
-    console.log("Response received:", response.data);
-
-    return {
-      success: true,
-      data: response.data,
-      statusCode: response.status
-    };
-
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.log("Error response:", error.response);
-
-      if (error.response?.status === 401) {
-        console.log("Unauthorized access, clearing token");
-        Cookies.remove('token');
-        window.location.href = '/login';
-      }
-
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Failed to place order',
-        statusCode: error.response?.status
-      };
+    if (!response.ok) {
+      throw new Error('Failed to fetch orders');
     }
 
+    const data = await response.json();
     return {
-      success: false,
-      error: 'An unexpected error occurred',
-      statusCode: 500
+      ...data,
+      orders: data.orders.map(order => ({
+        id: order.order_id,
+        date: new Date(order.order_date).toLocaleDateString(),
+        total: order.total_amount,
+        status: order.status,
+        items: order.items.map(item => ({
+          id: item.product_id,
+          name: item.product_name,
+          quantity: item.quantity,
+          price: item.unit_price,
+          image: item.thumbnail_url || '/api/placeholder/100/100',
+          review: {
+            rating: item.rating || 0,
+            comment: item.review_comment || ''
+          }
+        })),
+        timeline: this.getOrderTimeline(order.status)
+      }))
     };
-  }
-};
+  },
 
-export {
-  placeOrder,
-  type PlaceOrderData,
-  type OrderItem,
-  type OrderResponse
+  getOrderTimeline(status) {
+    const statuses = ['pending', 'packed', 'shipped', 'delivered'];
+    return statuses.map((stat, index) => ({
+      status: stat,
+      completed: index <= statuses.indexOf(status),
+      date: index <= statuses.indexOf(status) ? new Date().toISOString() : null
+    }));
+  },
+
+  async createOrder(orderData) {
+    const response = await fetch(`${BASE_URL}/protected/orders`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(orderData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create order');
+    }
+    return response.json();
+  },
+
+  async submitReview(reviewData) {
+    const response = await fetch(`${BASE_URL}/protected/product/review`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(reviewData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to submit review');
+    }
+    return response.json();
+  }
 };
